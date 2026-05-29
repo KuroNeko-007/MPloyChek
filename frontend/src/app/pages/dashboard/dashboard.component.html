@@ -1,0 +1,168 @@
+<div class="shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="brand-mark">M</div>
+      <div class="sb-brand-text">
+        <span class="sb-name">MPloyChek</span>
+        <span class="sb-version">v1.0.0</span>
+      </div>
+    </div>
+
+    <div class="sb-section-label">Navigation</div>
+
+    <nav class="sb-nav">
+      <a class="sb-link active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="sb-link" *ngIf="user?.role === 'Admin'" (click)="goToAdmin()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <span>User Management</span>
+      </a>
+    </nav>
+
+    <div class="sb-spacer"></div>
+
+    <div class="sb-user-card">
+      <div class="sb-avatar">{{ getInitials(user?.name) }}</div>
+      <div class="sb-user-info">
+        <span class="sb-user-name">{{ user?.name }}</span>
+        <span class="sb-user-role">{{ user?.role }}</span>
+      </div>
+      <button class="sb-logout" (click)="logout()" title="Sign out">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <p class="topbar-path">
+          <span class="path-muted">MPloyChek</span>
+          <span class="path-sep">/</span>
+          <span>Dashboard</span>
+        </p>
+        <h1 class="page-heading">Overview</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="role-tag" [class.is-admin]="user?.role === 'Admin'">
+          <span class="role-dot"></span>
+          {{ user?.role }}
+        </div>
+      </div>
+    </header>
+
+    <!-- Identity strip -->
+    <div class="identity-strip">
+      <div class="identity-card" *ngFor="let item of identityItems">
+        <span class="id-label">{{ item.label }}</span>
+        <span class="id-value">{{ item.value }}</span>
+      </div>
+    </div>
+
+    <!-- Records section -->
+    <section class="records-section">
+
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">Records</h2>
+          <p class="section-sub">
+            <ng-container *ngIf="user?.role === 'Admin'">All records — admin view</ng-container>
+            <ng-container *ngIf="user?.role !== 'Admin'">Showing your assigned records</ng-container>
+          </p>
+        </div>
+        <div class="section-controls">
+          <div class="delay-control">
+            <span class="ctrl-label">Delay</span>
+            <select [(ngModel)]="selectedDelay" (change)="loadRecords()" class="ctrl-select">
+              <option [value]="0">None</option>
+              <option [value]="1000">1s</option>
+              <option [value]="2000">2s</option>
+              <option [value]="4000">4s</option>
+            </select>
+          </div>
+          <button class="icon-btn" (click)="loadRecords()" [disabled]="isLoadingRecords" title="Refresh">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="async-bar" *ngIf="isLoadingRecords">
+        <div class="async-bar-track"><div class="async-bar-fill"></div></div>
+        <span class="async-label">Fetching records{{ selectedDelay > 0 ? ' with ' + (selectedDelay/1000) + 's simulated delay' : '' }}…</span>
+      </div>
+
+      <!-- Error -->
+      <div class="state-error" *ngIf="!isLoadingRecords && recordError">
+        {{ recordError }}
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap" *ngIf="!isLoadingRecords && !recordError">
+
+        <table class="rec-table" *ngIf="records.length > 0">
+          <thead>
+            <tr>
+              <th class="th-num">#</th>
+              <th>Title</th>
+              <th>Description</th>
+              <th>Owner</th>
+              <th>Access</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of records; let i = index" class="rec-row">
+              <td class="td-num">{{ i + 1 }}</td>
+              <td class="td-title">{{ r.title }}</td>
+              <td class="td-desc">{{ r.description }}</td>
+              <td><code class="owner-code">{{ r.ownerId }}</code></td>
+              <td>
+                <span class="pill" [ngClass]="r.accessLevel === 'public' ? 'pill-green' : 'pill-amber'">
+                  {{ r.accessLevel }}
+                </span>
+              </td>
+              <td>
+                <span class="status-badge" [ngClass]="r.status === 'active' ? 'status-on' : 'status-off'">
+                  <span class="status-dot"></span>{{ r.status }}
+                </span>
+              </td>
+              <td class="td-date">{{ r.createdAt | date: 'dd MMM yyyy' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="empty-state" *ngIf="records.length === 0">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          <p>No records found.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

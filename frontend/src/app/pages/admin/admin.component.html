@@ -1,0 +1,258 @@
+<div class="shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="brand-mark">M</div>
+      <div class="sb-brand-text">
+        <span class="sb-name">MPloyChek</span>
+        <span class="sb-version">v1.0.0</span>
+      </div>
+    </div>
+
+    <div class="sb-section-label">Navigation</div>
+
+    <nav class="sb-nav">
+      <a class="sb-link" (click)="goToDashboard()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="sb-link active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <span>User Management</span>
+      </a>
+    </nav>
+
+    <div class="sb-spacer"></div>
+
+    <div class="sb-user-card">
+      <div class="sb-avatar">{{ getInitials(currentUser?.name) }}</div>
+      <div class="sb-user-info">
+        <span class="sb-user-name">{{ currentUser?.name }}</span>
+        <span class="sb-user-role">{{ currentUser?.role }}</span>
+      </div>
+      <button class="sb-logout" (click)="logout()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <p class="topbar-path">
+          <span class="path-muted">MPloyChek</span>
+          <span class="path-sep">/</span>
+          <span>User Management</span>
+        </p>
+        <h1 class="page-heading">Users</h1>
+      </div>
+      <button class="add-btn" (click)="toggleAddForm()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        {{ showAddForm ? 'Cancel' : 'Add User' }}
+      </button>
+    </header>
+
+    <!-- Stats strip -->
+    <div class="stats-strip">
+      <div class="stat-cell">
+        <span class="stat-n">{{ users.length }}</span>
+        <span class="stat-l">Total</span>
+      </div>
+      <div class="strip-div"></div>
+      <div class="stat-cell">
+        <span class="stat-n">{{ users | adminCount }}</span>
+        <span class="stat-l">Admins</span>
+      </div>
+      <div class="strip-div"></div>
+      <div class="stat-cell">
+        <span class="stat-n">{{ users | generalCount }}</span>
+        <span class="stat-l">General</span>
+      </div>
+    </div>
+
+    <div class="content-area">
+
+      <!-- Add form -->
+      <div class="add-form" *ngIf="showAddForm">
+
+        <div class="form-topline">
+          <h3 class="form-heading">New User</h3>
+          <span class="form-required">* all fields required</span>
+        </div>
+
+        <div class="alert alert-ok"  *ngIf="formSuccess">{{ formSuccess }}</div>
+        <div class="alert alert-err" *ngIf="formError">{{ formError }}</div>
+
+        <div class="form-grid">
+          <div class="f-group">
+            <label class="f-label">User ID *</label>
+            <input class="f-input" type="text" [(ngModel)]="newUser.userId" placeholder="e.g. user03" />
+          </div>
+          <div class="f-group">
+            <label class="f-label">Full Name *</label>
+            <input class="f-input" type="text" [(ngModel)]="newUser.name" placeholder="John Doe" />
+          </div>
+          <div class="f-group">
+            <label class="f-label">Email *</label>
+            <input class="f-input" type="email" [(ngModel)]="newUser.email" placeholder="john@app.com" />
+          </div>
+          <div class="f-group">
+            <label class="f-label">Password *</label>
+            <input class="f-input" type="password" [(ngModel)]="newUser.password" placeholder="Min 6 characters" />
+          </div>
+          <div class="f-group">
+            <label class="f-label">Role *</label>
+            <select class="f-input" [(ngModel)]="newUser.role">
+              <option value="General User">General User</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-foot">
+          <button class="btn-ghost" (click)="toggleAddForm()">Cancel</button>
+          <button class="btn-gold" (click)="onAddUser()" [disabled]="isSubmitting">
+            <span *ngIf="!isSubmitting">Create User</span>
+            <span *ngIf="isSubmitting" class="spin-row">
+              <span class="mini-spin"></span> Creating…
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Table card -->
+      <div class="table-card">
+
+        <div class="table-head">
+          <span class="table-head-title">All Users</span>
+          <div class="table-controls">
+            <div class="delay-control">
+              <span class="ctrl-label">Delay</span>
+              <select class="ctrl-select" [(ngModel)]="selectedDelay" (change)="loadUsers()">
+                <option [value]="0">None</option>
+                <option [value]="1000">1s</option>
+                <option [value]="2000">2s</option>
+                <option [value]="4000">4s</option>
+              </select>
+            </div>
+            <button class="icon-btn" (click)="loadUsers()" [disabled]="isLoadingUsers">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"/>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div class="async-bar" *ngIf="isLoadingUsers">
+          <div class="async-bar-track"><div class="async-bar-fill"></div></div>
+          <span class="async-label">Loading users…</span>
+        </div>
+
+        <!-- Error -->
+        <div class="state-error" *ngIf="!isLoadingUsers && usersError">{{ usersError }}</div>
+
+        <!-- Table -->
+        <div class="table-wrap" *ngIf="!isLoadingUsers && !usersError">
+          <table class="u-table">
+            <thead>
+              <tr>
+                <th class="th-num">#</th>
+                <th>User</th>
+                <th>User ID</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Created</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let u of users; let i = index" class="u-row">
+                <td class="td-num">{{ i + 1 }}</td>
+                <td>
+                  <div class="user-cell">
+                    <div class="mini-av">{{ getInitials(u.name) }}</div>
+                    <span class="u-fullname">{{ u.name }}</span>
+                  </div>
+                </td>
+                <td><code class="owner-code">{{ u.userId }}</code></td>
+                <td class="u-email">{{ u.email }}</td>
+                <td>
+                  <span class="pill" [ngClass]="u.role === 'Admin' ? 'pill-amber' : 'pill-green'">
+                    {{ u.role }}
+                  </span>
+                </td>
+                <td class="td-date">{{ u.createdAt | date: 'dd MMM yyyy' }}</td>
+                <td>
+                  <button
+                    class="del-btn"
+                    (click)="confirmDelete(u.userId)"
+                    [disabled]="isSelf(u.userId)"
+                    [title]="isSelf(u.userId) ? 'Cannot delete yourself' : 'Delete'"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                      <path d="M10 11v6M14 11v6"/>
+                      <path d="M9 6V4h6v2"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Delete modal -->
+<div class="modal-wrap" *ngIf="showDeleteConfirm">
+  <div class="modal">
+    <div class="modal-icon-ring">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        <path d="M10 11v6M14 11v6"/>
+        <path d="M9 6V4h6v2"/>
+      </svg>
+    </div>
+    <h3 class="modal-title">Confirm Delete</h3>
+    <p class="modal-body">
+      You are about to permanently delete
+      <strong>{{ deleteTargetId }}</strong>.
+      This cannot be undone.
+    </p>
+    <div class="modal-actions">
+      <button class="btn-ghost" (click)="cancelDelete()">Cancel</button>
+      <button class="btn-danger" (click)="onDeleteUser()" [disabled]="isDeleting">
+        <span *ngIf="!isDeleting">Delete</span>
+        <span *ngIf="isDeleting" class="spin-row">
+          <span class="mini-spin dark"></span> Deleting…
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
