@@ -197,11 +197,15 @@ GET /api/records?delay=1500 # 1.5 second delay
   - Supports `delay` query parameter for async demonstration
 
 ## Screenshots
-
+## Login Page
 <img width="1919" height="1037" alt="login" src="https://github.com/user-attachments/assets/228b1a42-9f6f-4987-b7eb-e0542b25ca86" />
+## Admin User Page
 <img width="1917" height="1012" alt="admin-user" src="https://github.com/user-attachments/assets/c305ec6b-4423-4639-b47f-15cdf5935ce6" />
+## Admin - Dashboard
 <img width="1917" height="966" alt="admin-dashboard" src="https://github.com/user-attachments/assets/7fbed5e2-b1ef-4eb9-aed7-a12d2c1a2ef9" />
+## Async Processing with delay Parameter
 <img width="1919" height="1011" alt="Async" src="https://github.com/user-attachments/assets/f8d8c30f-2781-419f-8f4e-013f68384a89" />
+## Sample Database Structure
 <img width="1919" height="1076" alt="DB" src="https://github.com/user-attachments/assets/9e3a0da1-5565-4374-89e2-8ec7eace7ca8" />
 
 
